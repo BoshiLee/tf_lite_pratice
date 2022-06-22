@@ -1,27 +1,23 @@
 package com.example.test_yolo
 
-import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.ImageProxy
 import java.io.IOException
-import org.tensorflow.lite.examples.objectdetection.ObjectDetectorHelper
-import org.tensorflow.lite.task.vision.detector.Detection
 
-class MainActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListener {
+class MainActivity : AppCompatActivity() {
 
     private var mImage: ImageView? = null
     private var mText: TextView? = null
     private var mbtn: Button? = null
-    private lateinit var objectDetectorHelper: ObjectDetectorHelper
+    private var objectDetectorHelper: ObjectDetectorHelper = ObjectDetectorHelper(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +27,10 @@ class MainActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListener 
         mText = findViewById(R.id.inferenceTextView)
         mbtn = findViewById(R.id.readImgBtn)
 
+        // Setup digit classifier.
+        objectDetectorHelper
+            .initialize()
+            .addOnFailureListener { e -> Log.e(TAG, "Error to setting up yolov5 model.", e) }
     }
 
     fun btnReadImageClick(view: View) {
@@ -61,30 +61,12 @@ class MainActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListener 
         )
         val imageRotation = 0
         // Pass Bitmap and rotation to the object detector helper for processing and detection
-        objectDetectorHelper.detect(image, imageRotation)
+//        objectDetectorHelper.detect(image, imageRotation)
     }
 
-    override fun onError(error: String) {
-        Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+    companion object {
+        private const val TAG = "MainActivity"
     }
-
-    override fun onResults(results: MutableList<Detection>?, inferenceTime: Long, imageHeight: Int, imageWidth: Int) {
-        this.runOnUiThread {
-            mText?.text = String.format("%d ms", inferenceTime)
-
-
-            // Pass necessary information to OverlayView for drawing on the canvas
-//            this.overlay.setResults(
-//                results ?: LinkedList<Detection>(),
-//                imageHeight,
-//                imageWidth
-//            )
-
-            // Force a redraw
-//            this.overlay.invalidate()
-        }
-    }
-
 
 }
 

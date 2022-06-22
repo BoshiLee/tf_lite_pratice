@@ -2,4 +2,7 @@
     <string name="app_name">test_yolo</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="clear_button_text" translatable="false">Clear</string>
+    <string name="prediction_text_placeholder" translatable="false">Please draw a digit</string>
+    <string name="detection_error_message" translatable="false">Error detection: %s</string>
 </resources>

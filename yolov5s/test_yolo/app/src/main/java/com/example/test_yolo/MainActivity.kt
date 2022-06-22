@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         mText?.text= "Button is Clicked!"
     }
 
-    fun loadDataFromAsset() {
+    private fun loadDataFromAsset() {
         try {
             val bitmap = assets.open("bus.jpg")
             val bit = BitmapFactory.decodeStream(bitmap)
@@ -54,14 +54,23 @@ class MainActivity : AppCompatActivity() {
     private fun detectObjects(bitmap: Bitmap) {
 
         // Copy out RGB bits to the shared bitmap buffer
-        val image: Bitmap = Bitmap.createBitmap(
-            bitmap.width,
-            bitmap.height,
-            Bitmap.Config.ARGB_8888
-        )
-        val imageRotation = 0
-        // Pass Bitmap and rotation to the object detector helper for processing and detection
-//        objectDetectorHelper.detect(image, imageRotation)
+//        val image: Bitmap = Bitmap.createBitmap(
+//            bitmap.width,
+//            bitmap.height,
+////            Bitmap.Config.ARGB_8888
+//        )
+        if (objectDetectorHelper.isInitialized) {
+            objectDetectorHelper
+                .detectionAsync(bitmap)
+                .addOnSuccessListener { resultText -> mText?.text = resultText }
+                .addOnFailureListener { e ->
+                    mText?.text = getString(
+                        R.string.detection_error_message,
+                        e.localizedMessage
+                    )
+                    Log.e(TAG, "Error classifying drawing.", e)
+                }
+        }
     }
 
     companion object {

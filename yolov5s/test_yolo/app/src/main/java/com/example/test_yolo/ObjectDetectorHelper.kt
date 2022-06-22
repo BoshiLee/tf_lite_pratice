@@ -87,7 +87,7 @@ class ObjectDetectorHelper(private val context: Context) {
     }
 
 
-    private fun classify(bitmap: Bitmap): String {
+    private fun detection(bitmap: Bitmap): String {
         check(isInitialized) { "TF Lite Interpreter is not initialized yet." }
 
         // TODO: Add code to run inference with TF Lite.
@@ -116,10 +116,10 @@ class ObjectDetectorHelper(private val context: Context) {
         return resultString
     }
 
-    fun classifyAsync(bitmap: Bitmap): Task<String> {
+    fun detectionAsync(bitmap: Bitmap): Task<String> {
         val task = TaskCompletionSource<String>()
         executorService.execute {
-            val result = classify(bitmap)
+            val result = detection(bitmap)
             task.setResult(result)
         }
         return task.task

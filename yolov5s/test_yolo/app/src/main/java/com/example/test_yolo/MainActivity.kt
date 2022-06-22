@@ -21,8 +21,6 @@ class MainActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListener 
     private var mImage: ImageView? = null
     private var mText: TextView? = null
     private var mbtn: Button? = null
-    private lateinit var bitmapBuffer: Bitmap
-    private val TAG = "ObjectDetection"
     private lateinit var objectDetectorHelper: ObjectDetectorHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,9 +59,9 @@ class MainActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListener 
             bitmap.height,
             Bitmap.Config.ARGB_8888
         )
-
-        val imageRotation = 0        // Pass Bitmap and rotation to the object detector helper for processing and detection
-        objectDetectorHelper.detect(bitmapBuffer, imageRotation)
+        val imageRotation = 0
+        // Pass Bitmap and rotation to the object detector helper for processing and detection
+        objectDetectorHelper.detect(image, imageRotation)
     }
 
     override fun onError(error: String) {

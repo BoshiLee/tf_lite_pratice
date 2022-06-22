@@ -72,6 +72,7 @@ class CameraActivity : AppCompatActivity() {
     private var imageRotationDegrees: Int = 0
     private val tfImageBuffer = TensorImage(DataType.UINT8)
 
+    // 在餵資料給 model 前，必須要先做圖像的 resize、norm 可以使用 ImageProcessor 來做預處理
     private val tfImageProcessor by lazy {
         val cropSize = minOf(bitmapBuffer.width, bitmapBuffer.height)
         ImageProcessor.Builder()
@@ -83,10 +84,11 @@ class CameraActivity : AppCompatActivity() {
             .build()
     }
 
-    private val nnApiDelegate by lazy  {
+    private val nnApiDelegate by lazy  { // lazy()功用類似 lateinit，可以接受一個lambda，然後回傳一個lazy的instance，
+        // It provides acceleration for TensorFlow Lite models on Android devices with supported hardware accelerators
         NnApiDelegate()
     }
-
+    // Interpreter 用來包裝預訓練 Model 以及可執行推理的功能
     private val tflite by lazy {
         Interpreter(
             FileUtil.loadMappedFile(this, MODEL_PATH),
@@ -99,6 +101,7 @@ class CameraActivity : AppCompatActivity() {
         )
     }
 
+    // 從
     private val tfInputSize by lazy {
         val inputIndex = 0
         val inputShape = tflite.getInputTensor(inputIndex).shape()
@@ -197,14 +200,16 @@ class CameraActivity : AppCompatActivity() {
 
                 // Copy out RGB bits to our shared buffer
                 image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer)  }
-
-                // Process the image in Tensorflow
+                // 複製圖片到 buffer 再由
+                // Process the image in Tensorflow ImageProcessor 去轉換成 tensor
                 val tfImage =  tfImageProcessor.process(tfImageBuffer.apply { load(bitmapBuffer) })
 
+                // 將轉換好的檔案餵給模型來做檢測
                 // Perform the object detection for the current frame
                 val predictions = detector.predict(tfImage)
 
                 // Report only the top prediction
+                // 選出最高分
                 reportPrediction(predictions.maxByOrNull { it.score })
 
                 // Compute the FPS of the entire pipeline
@@ -233,6 +238,7 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    //
     private fun reportPrediction(
         prediction: ObjectDetectionHelper.ObjectPrediction?
     ) = activityCameraBinding.viewFinder.post {
@@ -339,6 +345,7 @@ class CameraActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    // 靜態區塊，類似 singleton，這裡用來存放靜態參數
     companion object {
         private val TAG = CameraActivity::class.java.simpleName
 

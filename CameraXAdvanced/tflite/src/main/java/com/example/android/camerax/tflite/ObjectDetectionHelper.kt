@@ -39,6 +39,7 @@ class ObjectDetectionHelper(private val tflite: Interpreter, private val labels:
         3 to FloatArray(1)
     )
 
+    // 將模型輸出的結果處理成 ObjectPrediction 列表
     val predictions get() = (0 until OBJECT_COUNT).map {
         ObjectPrediction(
 

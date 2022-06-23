@@ -18,13 +18,13 @@ apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId 'com.android.example.camerax.tflite'
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 1
         versionName "0.0.1"
     }

@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId 'com.android.example.camerax.tflite'
-        minSdkVersion 21
+        minSdkVersion 22
         targetSdkVersion 33
         versionCode 1
         versionName "0.0.1"

@@ -39,24 +39,24 @@ class ObjectDetectionHelper(private val tflite: Interpreter, private val labels:
         3 to FloatArray(1)
     )
 
-    // 將模型輸出的結果處理成 ObjectPrediction 列表
-    val predictions get() = (0 until OBJECT_COUNT).map {
-        ObjectPrediction(
+// 將模型輸出的結果處理成 ObjectPrediction 列表
+private val predictions get() = (0 until OBJECT_COUNT).map { count ->
+    ObjectPrediction(
 
-            // The locations are an array of [0, 1] floats for [top, left, bottom, right]
-            location = locations[0][it].let {
-                RectF(it[1], it[0], it[3], it[2])
-            },
+        // The locations are an array of [0, 1] floats for [top, left, bottom, right]
+        location = locations[0][count].let { locat ->
+            RectF(locat[1], locat[0], locat[3], locat[2])
+        },
 
-            // SSD Mobilenet V1 Model assumes class 0 is background class
-            // in label file and class labels start from 1 to number_of_classes + 1,
-            // while outputClasses correspond to class index from 0 to number_of_classes
-            label = labels[1 + labelIndices[0][it].toInt()],
+        // SSD Mobilenet V1 Model assumes class 0 is background class
+        // in label file and class labels start from 1 to number_of_classes + 1,
+        // while outputClasses correspond to class index from 0 to number_of_classes
+        label = labels[1 + labelIndices[0][count].toInt()],
 
-            // Score is a single value of [0, 1]
-            score = scores[0][it]
-        )
-    }
+        // Score is a single value of [0, 1]
+        score = scores[0][count]
+    )
+}
 
     fun predict(image: TensorImage): List<ObjectPrediction> {
         tflite.runForMultipleInputsOutputs(arrayOf(image.buffer), outputBuffer)

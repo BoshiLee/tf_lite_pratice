@@ -16,9 +16,11 @@
 
 package com.example.android.camerax.tflite
 
+import android.graphics.Bitmap
 import android.graphics.RectF
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.image.TensorImage
+import java.nio.ByteBuffer
 
 /**
  * Helper class used to communicate between our app and the TF object detection model
@@ -31,6 +33,11 @@ class ObjectDetectionHelper(private val tflite: Interpreter, private val labels:
     private val locations = arrayOf(Array(OBJECT_COUNT) { FloatArray(4) })
     private val labelIndices =  arrayOf(FloatArray(OBJECT_COUNT))
     private val scores =  arrayOf(FloatArray(OBJECT_COUNT))
+
+    // Float model
+    private val IMAGE_MEAN = 0f
+
+    private val IMAGE_STD = 255.0f
 
     private val outputBuffer = mapOf(
         0 to locations,
@@ -62,6 +69,37 @@ private val predictions get() = (0 until OBJECT_COUNT).map { count ->
         tflite.runForMultipleInputsOutputs(arrayOf(image.buffer), outputBuffer)
         return predictions
     }
+//
+//    protected fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer? {
+////        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * BATCH_SIZE * INPUT_SIZE * INPUT_SIZE * PIXEL_SIZE);
+////        byteBuffer.order(ByteOrder.nativeOrder());
+////        int[] intValues = new int[INPUT_SIZE * INPUT_SIZE];
+//        bitmap.getPixels(intValues, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+//        val pixel = 0
+//        imgData.rewind()
+//        for (i in 0 until INPUT_SIZE) {
+//            for (j in 0 until INPUT_SIZE) {
+//                val pixelValue: Int = intValues.get(i * INPUT_SIZE + j)
+//                if (isModelQuantized) {
+//                    // Quantized model
+//                    imgData.put((((pixelValue shr 16 and 0xFF) - IMAGE_MEAN) / IMAGE_STD / inp_scale + inp_zero_point).toByte())
+//                    imgData.put((((pixelValue shr 8 and 0xFF) - IMAGE_MEAN) / IMAGE_STD / inp_scale + inp_zero_point).toByte())
+//                    imgData.put((((pixelValue and 0xFF) - IMAGE_MEAN) / IMAGE_STD / inp_scale + inp_zero_point).toByte())
+//                } else { // Float model
+//                    imgData.putFloat(((pixelValue shr 16 and 0xFF) - IMAGE_MEAN) / IMAGE_STD)
+//                    imgData.putFloat(((pixelValue shr 8 and 0xFF) - IMAGE_MEAN) / IMAGE_STD)
+//                    imgData.putFloat(((pixelValue and 0xFF) - IMAGE_MEAN) / IMAGE_STD)
+//                }
+//            }
+//        }
+//        return imgData
+//    }
+//
+//    fun recognizeImage(bitmap: Bitmap): List<ObjectPrediction> {
+//        val byteBuffer_: ByteBuffer = convertBitmapToByteBuffer(bitmap)
+//        tflite.runForMultipleInputsOutputs(arrayOf(bitmap.buffer), outputBuffer)
+//        return predictions
+//    }
 
     companion object {
         const val OBJECT_COUNT = 10

@@ -350,7 +350,7 @@ class CameraActivity : AppCompatActivity() {
         private val TAG = CameraActivity::class.java.simpleName
 
         private const val ACCURACY_THRESHOLD = 0.5f
-        private const val MODEL_PATH = "coco_ssd_mobilenet_v1_1.0_quant.tflite"
-        private const val LABELS_PATH = "coco_ssd_mobilenet_v1_1.0_labels.txt"
+        private const val MODEL_PATH = "yolov5s-fp16.tflite"
+        private const val LABELS_PATH = "yolov5s-label.txt"
     }
 }

@@ -162,8 +162,7 @@ class YoloCameraActivity : AppCompatActivity() {
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
 
-            var frameCounter = 0
-            var lastFpsTimestamp = System.currentTimeMillis()
+            System.currentTimeMillis()
 
             imageAnalysis.setAnalyzer(executor, ImageAnalysis.Analyzer { image ->
                 if (!::bitmapBuffer.isInitialized) {

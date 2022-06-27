@@ -72,53 +72,22 @@ class YoloCameraActivity : AppCompatActivity() {
 
     private var pauseAnalysis = false
     private var imageRotationDegrees: Int = 0
-    private val tfImageBuffer = TensorImage(DataType.UINT8)
-
-    // 在餵資料給 model 前，必須要先做圖像的 resize、norm 可以使用 ImageProcessor 來做預處理
-    private val tfImageProcessor by lazy {
-        val cropSize = minOf(bitmapBuffer.width, bitmapBuffer.height)
-        ImageProcessor.Builder()
-            .add(ResizeWithCropOrPadOp(cropSize, cropSize))
-            .add(ResizeOp(
-                tfInputSize.height, tfInputSize.width, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
-            .add(Rot90Op(-imageRotationDegrees / 90))
-            .add(NormalizeOp(0f, 1f))
-            .build()
-    }
 
     private val nnApiDelegate by lazy  { // lazy()功用類似 lateinit，可以接受一個lambda，然後回傳一個lazy的instance，
         // It provides acceleration for TensorFlow Lite models on Android devices with supported hardware accelerators
         NnApiDelegate()
     }
-    // Interpreter 用來包裝預訓練 Model 以及可執行推理的功能
-    private val tflite by lazy {
-        Interpreter(
-            FileUtil.loadMappedFile(this, MODEL_PATH),
-            Interpreter.Options().addDelegate(nnApiDelegate))
-    }
-
-    val TF_OD_API_INPUT_SIZE = 640
-
-    private val TF_OD_API_IS_QUANTIZED = false
 
 
-    private val TF_OD_API_LABELS_FILE = "file:///android_asset/yolov5s-label.txt"
     
     private val detector by lazy {
         YoloV5Classifier.create(
             assets,
             MODEL_PATH,
-            TF_OD_API_LABELS_FILE,
+            LABELS_PATH,
             TF_OD_API_IS_QUANTIZED,
             TF_OD_API_INPUT_SIZE
         )
-    }
-
-    // 從
-    private val tfInputSize by lazy {
-        val inputIndex = 0
-        val inputShape = tflite.getInputTensor(inputIndex).shape()
-        Size(inputShape[2], inputShape[1]) // Order of axis is: {1, height, width, 3}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -163,7 +132,7 @@ class YoloCameraActivity : AppCompatActivity() {
         }
 
         // Release TFLite resources.
-        tflite.close()
+        detector.close()
         nnApiDelegate.close()
 
         super.onDestroy()
@@ -215,7 +184,6 @@ class YoloCameraActivity : AppCompatActivity() {
                 image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer)  }
                 // 複製圖片到 buffer 再由
                 // Process the image in Tensorflow ImageProcessor 去轉換成 tensor
-                val tfImage =  tfImageProcessor.process(tfImageBuffer.apply { load(bitmapBuffer) })
 
                 // 將轉換好的檔案餵給模型來做檢測
                 // Perform the object detection for the current frame
@@ -372,6 +340,8 @@ class YoloCameraActivity : AppCompatActivity() {
 
         private const val ACCURACY_THRESHOLD = 0.5f
         private const val MODEL_PATH = "yolov5s-fp16.tflite"
-        private const val LABELS_PATH = "yolov5s-label.txt"
+        private const val LABELS_PATH = "file:///android_asset/yolov5s-label.txt"
+        private const val TF_OD_API_INPUT_SIZE = 640
+        private const val TF_OD_API_IS_QUANTIZED = false
     }
 }

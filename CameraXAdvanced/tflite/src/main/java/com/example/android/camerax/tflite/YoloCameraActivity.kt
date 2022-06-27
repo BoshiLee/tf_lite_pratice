@@ -154,6 +154,9 @@ class YoloCameraActivity : AppCompatActivity() {
                 .setTargetRotation(activityCameraBinding.viewFinder.display.rotation)
                 .build()
 
+            var frameCounter = 0
+            var lastFpsTimestamp = System.currentTimeMillis()
+
             // Set up the image analysis use case which will process frames in real time
             val imageAnalysis = ImageAnalysis.Builder()
                 .setTargetAspectRatio(AspectRatio.RATIO_4_3)
@@ -192,24 +195,20 @@ class YoloCameraActivity : AppCompatActivity() {
                 )
                 val predictions: ArrayList<Classifier.Recognition> = detector.recognizeImage(cropBitmap)
 
-                predictions.forEach {
-                    print(it.confidence)
-                }
-
                 // Report only the top prediction
                 // 選出最高分
-//                reportPrediction(predictions.maxByOrNull { it.score })`
+                reportPrediction(predictions.maxByOrNull { it.confidence })
 
                 // Compute the FPS of the entire pipeline
-//                val frameCount = 10
-//                if (++frameCounter % frameCount == 0) {
-//                    frameCounter = 0
-//                    val now = System.currentTimeMillis()
-//                    val delta = now - lastFpsTimestamp
-//                    val fps = 1000 * frameCount.toFloat() / delta
-//                    Log.d(TAG, "FPS: ${"%.02f".format(fps)} with tensorSize: ${tfImage.width} x ${tfImage.height}")
-//                    lastFpsTimestamp = now
-//                }
+                val frameCount = 10
+                if (++frameCounter % frameCount == 0) {
+                    frameCounter = 0
+                    val now = System.currentTimeMillis()
+                    val delta = now - lastFpsTimestamp
+                    val fps = 1000 * frameCount.toFloat() / delta
+                    Log.d(TAG, "FPS: ${"%.02f".format(fps)} with tensorSize: ${cropBitmap.width} x ${cropBitmap.height}")
+                    lastFpsTimestamp = now
+                }
             })
 
             // Create a new camera selector each time, enforcing lens facing
@@ -228,11 +227,11 @@ class YoloCameraActivity : AppCompatActivity() {
 
     //
     private fun reportPrediction(
-        prediction: ObjectDetectionHelper.ObjectPrediction?
+        prediction: Classifier.Recognition?
     ) = activityCameraBinding.viewFinder.post {
 
         // Early exit: if prediction is not good enough, don't report it
-        if (prediction == null || prediction.score < ACCURACY_THRESHOLD) {
+        if (prediction == null || prediction.confidence < ACCURACY_THRESHOLD) {
             activityCameraBinding.boxPrediction.visibility = View.GONE
             activityCameraBinding.textPrediction.visibility = View.GONE
             return@post
@@ -242,7 +241,7 @@ class YoloCameraActivity : AppCompatActivity() {
         val location = mapOutputCoordinates(prediction.location)
 
         // Update the text and UI
-        activityCameraBinding.textPrediction.text = "${"%.2f".format(prediction.score)} ${prediction.label}"
+        activityCameraBinding.textPrediction.text = "${"%.2f".format(prediction.confidence)} ${prediction.detectedClass}"
         (activityCameraBinding.boxPrediction.layoutParams as ViewGroup.MarginLayoutParams).apply {
             topMargin = location.top.toInt()
             leftMargin = location.left.toInt()

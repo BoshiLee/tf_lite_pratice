@@ -241,7 +241,7 @@ class YoloCameraActivity : AppCompatActivity() {
         val location = mapOutputCoordinates(prediction.location)
 
         // Update the text and UI
-        activityCameraBinding.textPrediction.text = "${"%.2f".format(prediction.confidence)} ${prediction.detectedClass}"
+        activityCameraBinding.textPrediction.text = "${"%.2f".format(prediction.confidence)} ${prediction.title}"
         (activityCameraBinding.boxPrediction.layoutParams as ViewGroup.MarginLayoutParams).apply {
             topMargin = location.top.toInt()
             leftMargin = location.left.toInt()
@@ -272,12 +272,12 @@ class YoloCameraActivity : AppCompatActivity() {
         val isFrontFacing = lensFacing == CameraSelector.LENS_FACING_FRONT
         val correctedLocation = if (isFrontFacing) {
             RectF(
-                activityCameraBinding.viewFinder.width - previewLocation.right,
-                previewLocation.top,
-                activityCameraBinding.viewFinder.width - previewLocation.left,
-                previewLocation.bottom)
+                activityCameraBinding.viewFinder.width - location.right,
+                location.top,
+                activityCameraBinding.viewFinder.width - location.left,
+                location.bottom)
         } else {
-            previewLocation
+            location
         }
 
         // Step 3: compensate for 1:1 to 4:3 aspect ratio conversion + small margin

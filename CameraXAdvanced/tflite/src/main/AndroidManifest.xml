@@ -34,7 +34,7 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <activity
-                android:name="com.example.android.camerax.tflite.CameraActivity"
+                android:name="com.example.android.camerax.tflite.YoloCameraActivity"
                 android:rotationAnimation="seamless"
                 android:exported="true">
             <intent-filter>
